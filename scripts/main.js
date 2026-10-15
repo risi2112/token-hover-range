@@ -3,8 +3,7 @@ const MODULE_ID = 'token-hover-range';
 const SETTINGS = {
    enabled: 'enabled',
    mode: 'mode',
-   elevation: 'elevation',
-   gmOrigin: 'gmOrigin'
+   elevation: 'elevation'
 };
 
 /** The hovered token currently showing a label, and its label. */
@@ -48,17 +47,6 @@ Hooks.once('init', () =>
       config: true,
       type: Boolean,
       default: true,
-      onChange: () => queueRefresh()
-   });
-
-   game.settings.register(MODULE_ID, SETTINGS.gmOrigin, {
-      name: i18n('GMOrigin.Name'),
-      hint: i18n('GMOrigin.Hint'),
-      scope: 'client',
-      config: true,
-      type: String,
-      default: 'controlled',
-      choices: { controlled: i18n('GMOrigin.Controlled'), party: i18n('GMOrigin.Party') },
       onChange: () => queueRefresh()
    });
 
@@ -124,30 +112,46 @@ function clearLabel()
 function showLabel()
 {
    const target = hovered;
+   const text = target && !target.destroyed && canvas?.ready && game.settings.get(MODULE_ID, SETTINGS.enabled) ?
+    distanceText(target) : null;
 
-   if (label && !label.destroyed) { label.destroy(); }
-   label = null;
+   // Nothing to show: remove any existing label but keep tracking the hovered token.
+   if (!text)
+   {
+      if (label && !label.destroyed) { label.destroy(); }
+      label = null;
+      return;
+   }
 
-   if (!target || target.destroyed || !canvas?.ready) { return; }
-   if (!game.settings.get(MODULE_ID, SETTINGS.enabled)) { return; }
+   // Reuse the existing label when it is still attached to this token; only touch it when something changed. Creating
+   // a fresh label on every refresh is what caused a visible flicker.
+   if (!label || label.destroyed || label.parent !== target)
+   {
+      if (label && !label.destroyed) { label.destroy(); }
+      label = createText(text);
+      label.anchor.set(0.5, 0.5);
+      target.addChild(label);
+   }
+   else if (label.text !== text)
+   {
+      label.text = text;
+   }
 
+   // Centered over the token artwork.
+   if (label.x !== target.w / 2 || label.y !== target.h / 2) { label.position.set(target.w / 2, target.h / 2); }
+}
+
+function distanceText(target)
+{
    const origin = findOrigin(target);
-   if (!origin) { return; }
+   if (!origin) { return null; }
 
-   const distance = measureTokens(origin.token, target);
-   if (!Number.isFinite(distance)) { return; }
+   const distance = measureTokens(origin, target);
+   if (!Number.isFinite(distance)) { return null; }
 
    const units = canvas.scene?.grid?.units ?? canvas.grid?.units ?? '';
    const rounded = Math.round(distance * 10) / 10;
-   const text = `${rounded.toLocaleString()}${units ? ` ${units}` : ''}`;
-
-   label = createText(text);
-
-   // Centered over the token artwork.
-   label.anchor.set(0.5, 0.5);
-   label.position.set(target.w / 2, target.h / 2);
-
-   target.addChild(label);
+   return `${rounded.toLocaleString()}${units ? ` ${units}` : ''}`;
 }
 
 function createText(content)
@@ -169,36 +173,29 @@ function createText(content)
 /**
  * @param {Token} target - The hovered token.
  *
- * @returns {{ token: Token, showName: boolean } | null} The token to measure from.
+ * @returns {Token | null} The token to measure from.
  */
 function findOrigin(target)
 {
    const candidates = (tokens) => tokens.filter((t) => t !== target && !t.destroyed && t.document);
 
-   // 1. Selected tokens always win.
+   // Selected tokens always win.
    const controlled = candidates(canvas.tokens.controlled);
-   if (controlled.length) { return { token: nearest(controlled, target), showName: controlled.length > 1 }; }
+   if (controlled.length) { return nearest(controlled, target); }
 
-   if (game.user.isGM)
-   {
-      if (game.settings.get(MODULE_ID, SETTINGS.gmOrigin) !== 'party') { return null; }
+   // The GM only measures from a selected token.
+   if (game.user.isGM) { return null; }
 
-      // 2a. GM: nearest token belonging to a player character.
-      const party = candidates(canvas.tokens.placeables.filter((t) => t.actor?.hasPlayerOwner));
-      return party.length ? { token: nearest(party, target), showName: true } : null;
-   }
-
-   // 2b. Player: their assigned character's token on this scene.
+   // Players with nothing selected: their assigned character's token, then any token they own.
    const character = game.user.character;
    if (character)
    {
       const own = candidates(canvas.tokens.placeables.filter((t) => t.actor?.id === character.id));
-      if (own.length) { return { token: nearest(own, target), showName: false }; }
+      if (own.length) { return nearest(own, target); }
    }
 
-   // 3. Player: any token they own on this scene.
    const owned = candidates(canvas.tokens.placeables.filter((t) => t.document.isOwner));
-   return owned.length ? { token: nearest(owned, target), showName: owned.length > 1 } : null;
+   return owned.length ? nearest(owned, target) : null;
 }
 
 function nearest(tokens, target)
