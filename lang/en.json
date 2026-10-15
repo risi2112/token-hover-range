@@ -1,0 +1,36 @@
+{
+  "TokenHoverRange": {
+    "Settings": {
+      "Enabled": {
+        "Name": "Show distance on hover",
+        "Hint": "Show the distance from your token when you hover over another token."
+      },
+      "Mode": {
+        "Name": "Measure between",
+        "Hint": "Nearest spaces matches D&D-style reach and range (adjacent tokens are 5 ft apart). Centers measures from the middle of each token.",
+        "Edge": "Nearest spaces",
+        "Center": "Token centers"
+      },
+      "Elevation": {
+        "Name": "Include elevation",
+        "Hint": "Count the height difference between tokens, including tokens on different levels."
+      },
+      "GMOrigin": {
+        "Name": "GM measures from",
+        "Hint": "Which token the GM measures from when no token is selected.",
+        "Controlled": "Selected token only",
+        "Party": "Nearest player-owned token"
+      }
+    },
+    "Keybindings": {
+      "Toggle": {
+        "Name": "Toggle hover distance",
+        "Hint": "Turn the hover distance label on or off."
+      }
+    },
+    "Notifications": {
+      "On": "Hover distance on",
+      "Off": "Hover distance off"
+    }
+  }
+}
