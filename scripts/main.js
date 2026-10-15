@@ -143,12 +143,10 @@ function showLabel()
    if (origin.showName) { text += `\n${origin.token.document.name}`; }
 
    label = createText(text);
-   label.anchor.set(0.5, 1);
 
-   // Sit above the token, and above the elevation tooltip if that is showing.
-   let offset = 4;
-   if (target.tooltip?.visible && target.tooltip?.text) { offset += target.tooltip.height; }
-   label.position.set(target.w / 2, -offset);
+   // Centered over the token artwork.
+   label.anchor.set(0.5, 0.5);
+   label.position.set(target.w / 2, target.h / 2);
 
    target.addChild(label);
 }
