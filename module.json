@@ -2,7 +2,7 @@
   "id": "token-hover-range",
   "title": "Token Hover Range",
   "description": "Hover over any token to see how far it is from your token.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "compatibility": {
     "minimum": "14",
     "verified": "14"

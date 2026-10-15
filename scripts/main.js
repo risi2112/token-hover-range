@@ -57,7 +57,7 @@ Hooks.once('init', () =>
       scope: 'client',
       config: true,
       type: String,
-      default: 'party',
+      default: 'controlled',
       choices: { controlled: i18n('GMOrigin.Controlled'), party: i18n('GMOrigin.Party') },
       onChange: () => queueRefresh()
    });
@@ -139,8 +139,7 @@ function showLabel()
 
    const units = canvas.scene?.grid?.units ?? canvas.grid?.units ?? '';
    const rounded = Math.round(distance * 10) / 10;
-   let text = `${rounded.toLocaleString()}${units ? ` ${units}` : ''}`;
-   if (origin.showName) { text += `\n${origin.token.document.name}`; }
+   const text = `${rounded.toLocaleString()}${units ? ` ${units}` : ''}`;
 
    label = createText(text);
 
