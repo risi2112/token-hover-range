@@ -14,6 +14,13 @@
       "Elevation": {
         "Name": "Include elevation",
         "Hint": "Count the height difference between tokens, including tokens on different levels."
+      },
+      "Color": {
+        "Name": "Label color",
+        "Hint": "Automatic switches to dark gray text on light token artwork so the distance stays readable.",
+        "Auto": "Automatic",
+        "Light": "Always white",
+        "Dark": "Always dark gray"
       }
     },
     "Keybindings": {
