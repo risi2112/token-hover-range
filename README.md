@@ -2,6 +2,14 @@
 
 A small Foundry VTT (V14) module: hover over any token to see how far it is from your token.
 
+## Install
+
+In Foundry, go to **Add-on Modules → Install Module**, paste this into **Manifest URL** at the bottom, and click **Install**:
+
+```
+https://github.com/risi2112/token-hover-range/releases/latest/download/module.json
+```
+
 ## Which token it measures from
 
 1. Your **selected** token(s). If you have more than one selected, the nearest one is used.
