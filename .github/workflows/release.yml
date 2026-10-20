@@ -17,7 +17,8 @@ jobs:
 
       - name: Set version and URLs in module.json
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          # Accept tags like v1.2.0, V1.2.0, V.1.2.0 or 1.2.0.
+          VERSION="$(echo "$GITHUB_REF_NAME" | sed -E 's/^[vV]\.?//')"
           REPO="https://github.com/${GITHUB_REPOSITORY}"
           jq --arg v "$VERSION" --arg url "$REPO" \
              --arg manifest "$REPO/releases/latest/download/module.json" \
