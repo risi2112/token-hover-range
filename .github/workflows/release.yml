@@ -1,0 +1,36 @@
+name: Release
+
+# Push a tag like v1.2.0 to build module.zip and publish a GitHub release that Foundry can install and update from.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version and URLs in module.json
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          REPO="https://github.com/${GITHUB_REPOSITORY}"
+          jq --arg v "$VERSION" --arg url "$REPO" \
+             --arg manifest "$REPO/releases/latest/download/module.json" \
+             --arg download "$REPO/releases/download/${GITHUB_REF_NAME}/module.zip" \
+             '.version = $v | .url = $url | .manifest = $manifest | .download = $download' \
+             module.json > module.tmp && mv module.tmp module.json
+
+      - name: Build module.zip
+        run: zip -r module.zip module.json scripts lang README.md
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            module.json
+            module.zip
+          generate_release_notes: true
