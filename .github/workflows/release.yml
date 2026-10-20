@@ -1,9 +1,10 @@
 name: Release
 
-# Push a tag like v1.2.0 to build module.zip and publish a GitHub release that Foundry can install and update from.
+# Publish a GitHub release (tag like v1.2.0) to build module.zip and attach it, plus module.json, to the release so
+# Foundry can install and update from it.
 on:
-  push:
-    tags: ["v*"]
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -33,4 +34,3 @@ jobs:
           files: |
             module.json
             module.zip
-          generate_release_notes: true
